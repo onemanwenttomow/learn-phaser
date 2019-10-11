@@ -22,45 +22,51 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
+var mass;
 
-function preload ()
-{
+function preload () {
     this.load.image('planet', 'assets/planet.png');
-    this.load.image('alien', 'assets/sprites/space-baddie.png');
+    this.load.image('star', 'assets/star.png');
 }
 
-function create ()
-{
+function create () {
     //  You can enable the Attractors plugin either via the game config (see above), or explicitly in code:
     // this.matter.system.enableAttractorPlugin();
 
     this.matter.world.setBounds();
 
-    this.matter.add.imageStack('alien', null, 0, 500, 1, 1, 0, 0, {
-        mass: 0.5,
-        ignorePointer: true
+    for (var i = 0; i < 5; i++) {
+        mass = generateRandomNum(5);
+        this.matter.add.image(generateRandomNum(800), generateRandomNum(600), 'planet', null, {
+            shape: {
+                type: 'circle',
+                radius: 64
+            },
+            mass: mass * 100000,
+            plugin: {
+                attractors: [
+                    function (bodyA, bodyB) {
+                        return {
+                            x: (bodyA.position.x - bodyB.position.x) * 0.0000001,
+                            y: (bodyA.position.y - bodyB.position.y) * 0.0000001
+                        };
+                    }
+                ]
+            }
+        }).setScale(mass/10);
+    }
+
+    this.matter.add.imageStack('star', null, 0, 0, 1, 1, 0, 0, {
+        mass: 1,
+        ignorePointer: false
     });
 
-    var planet = this.matter.add.image(400, 200, 'planet', null, {
-        shape: {
-            type: 'circle',
-            radius: 64
-        },
-        plugin: {
-            attractors: [
-                function (bodyA, bodyB) {
-                    return {
-                        x: (bodyA.position.x - bodyB.position.x) * 0.000001,
-                        y: (bodyA.position.y - bodyB.position.y) * 0.000001
-                    };
-                }
-            ]
-        }
-    });
-    // var circle = new Phaser.Geom.Circle(0, 0, 50);
 
-    var r1 = this.add.circle(200, 200, 80, 0x6666ff);
 
 
     this.matter.add.mouseSpring();
+}
+
+function generateRandomNum(num) {
+    return Math.floor(Math.random() * num + 1);
 }
